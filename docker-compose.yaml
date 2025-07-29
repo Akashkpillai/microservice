@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   reservations:
     build:
@@ -12,13 +10,10 @@ services:
     volumes:
       - .:/usr/src/app
 
-#   mongo:
-#     image: mongo:latest
-#     container_name: mongo
-#     ports:
-#       - '27017:27017'
-#     volumes:
-#       - mongo_data:/data/db
-
-# volumes:
-#   mongo_data:
+  postgres:
+    image: postgres
+    ports:
+      - '5422:5432'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
