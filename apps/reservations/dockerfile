@@ -1,4 +1,6 @@
+# -------------------------------
 # Development stage
+# -------------------------------
 FROM node:20-alpine AS development
 
 WORKDIR /usr/src/app
@@ -10,9 +12,16 @@ RUN npm install
 
 COPY . .
 
+# Generate Prisma client
+RUN npx prisma generate --schema=apps/reservations/prisma/schema.prisma
+
+# Build the project
 RUN npm run build
 
+
+# -------------------------------
 # Production stage
+# -------------------------------
 FROM node:20-alpine AS production
 
 ARG NODE_ENV=production
@@ -25,6 +34,12 @@ COPY package-lock.json ./
 
 RUN npm install --only=production
 
+# ✅ Copy the generated Prisma client
+COPY --from=development /usr/src/app/node_modules/.prisma /usr/src/app/node_modules/.prisma
+COPY --from=development /usr/src/app/node_modules/@prisma /usr/src/app/node_modules/@prisma
+COPY --from=development /usr/src/app/node_modules/@prisma/client /usr/src/app/node_modules/@prisma/client
+
+# ✅ Copy the built dist folder
 COPY --from=development /usr/src/app/dist ./dist
 
 CMD ["node", "dist/apps/reservations/main.js"]
